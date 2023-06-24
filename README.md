@@ -306,6 +306,121 @@ Genera un directorio y dentro del mismo un archivo index.html donde podremos ver
 
 <img src="./images/coverage_report_html.png">
 
+----------------------------
+
+## Code Smells (Código que huele mal)
+
+**¿Que son los code smells?**
+
+1. Son síntomas de que el código no es todo lo limpio que debería. Algo "huele mal en el código".
+2. 7 Tipos de code smells:
+   1. En los comentarios
+   2. En el entorno de desarrollo
+   3. En las funciones
+   4. Code smells generales
+   5. Code smells en Java (aunque muchos se peuden aplicar a otros lenguajes)
+   6. En los nombres
+   7. En los tests.
+
+------------------------------
+
+## Code smell en los comentarios: 
+
+**C1: Información inapropiada**
+
+Todo lo que esté mejor en otro sistema (ej. Sistema de control de cambios - Git) debe ser eliminado del codigo. 
+
+Ejemplo mas clasico ó 1: Código sin uso en la actualidad que lo dejamos "por las dudas". Es una mala práctica dado que si llegamos a necesitarlo podemos volver a encontrarlo en la historia de nuestro proyecto de Git u otro sistema de versionado. 
+
+Ejemplo 2: Dejar comentado los datos del autor del código y la fecha de creación... Esto es información que ya queda registrada en nuestro sistema de versionado.
+
+```py
+# @author Mariano Gobea
+# Create Date: 24.06.2023 13:45 hs
+class Comments:
+   pass
+```
+
+Ejemplo 3: TODO´s con los pendientes. También es una mala práctica. Los pendientes deben ser registrados en un sistema de registro de tareas pendientes como por ejemplo "Monday" o "Notion" no en el código en sí. 
+
+Ejemplo 4: Comentarios obsoletos, supongamos que tenemos una una variable que almacena una fecha y en principio era de tipo string pero luego la cambiamos a Datetime. Si el comentario sigue señalando que es de tipo String entonces se trata de un comentario obsoleto: 
+
+```java
+private Date lastLoginDate; // Last Login date as String (DD-MM-YYYY HH:MM)
+```
+Ejemplo 5: Comentarios redundantes. Es decir, comentarios que dan información que es muy clara con solo leer el código si es que el mismo fue bien nombrado. 
+
+Ejemplo 6: Comentarios mal redactados. No hay que cometer faltas de ortografía en los comentarios, debemos asegurarnos de que se entienda lo que queremos decir con los mismos.
+
+-------------------------
+
+## Code smells asociados al entorno de desarrollo. 
+
+Mas concretamente son code smells asociados a la etapa de compilación del software y de la ejecución de tests. 
+
+E1: La compilación requiere mas de un paso: 
+Debes ser capaz de hecer un checkout del código fuente con un comando y compilarlo con otro. 
+
+Aplicado a Python tiene que ver con las dependencias de un proyecto. Es importante detallar las mismas (archivo requirements.txt) así como un código simple que nos permita tenerlas y no estar instalando una por una. En python ese comando es: 
+
+```bash
+pip install -r requirements.txt
+```
+Por supuesto que este comando solo va a funcionar en los casos donde contemos en el proyecto donde estamos trabajando con un archivo requirements.txt. De allí la importancia de generarlo y mantenerlo actualizado al mismo cuando somos nosotros los que iniciamos un proyecto o agregamos dependencias al mismo que inicialmente no existian. 
+
+E2: Los tests requieren mas de un paso
+
+Los tests se deben ejecutar con único comando que sea simple, rápido y obvio. Caso contrario corremos el riesgo de ejecutar los tests habitualmente por "pereza". Debemos ejecutar los tests cada día decenas, o incluso cientos de veces para evitar cometer errores en el código que luego nos cueste mucho tiempo encontrar. 
+
+Ejemplo en python para ejecutar un archivo de test contamos con el comando: 
+
+```bash
+python3 -m unittest nombre_del_archivo.py
+```
+
+--------------------------------
+
+## Code smells asociados a las funciones
+
+F1: Demasiados argumentos
+
+Lo mejor es que una función no reciba argumentos, seguido por uno, dos y tres argumentos. Se deben evitar las funciones con > 3 argumentos. 
+
+Es una buena práctica, que ya mencionamos mas arriba encapsular argumentos dentro de una clase cuando la misma recibe mas de 3 argumentos. Otra opción es dividir la función en dos o mas funciones para reducir así la cantidad de argumentos recibidos. Dado que seguramente si una función recibe mas de tres argumentos su scope sea superior a la máxima que reza que una función debe hacer una única cosa. 
+
+F2: Argumentos de salida
+
+Una función no debe realizar tareas de salida a consola, por ejemplo, no debe imprimir. En su lugar debe retornar los valores que que queremos sacar de la misma para que la impresión se realice desde el codigo principal.
+
+Otro ejemplo del mismo error es envíar un argumento con puntero (& para enviarla y * para recibirla. Al igual que los punteros en Golang), es decir, del entorno global del programa, dado que queremos modificarlo dentro de la función en lugar de retornar un valor de la función y luego guardarlo en una variable que invoque a nuestra función.
+
+F3: Pasar flags (variables booleanas) como argumento
+
+¿Por que es un error? Porque un flag suele indicar que una función hace mas de una cosa, es decir, va a hacer algo si el flag es true y otra cosa si el flag es false. Y como ya repetimos muchas veces esto es un error dado que una función debe hacer una única cosa. Si tenes la necesidad de hacer dos cosas distintas entonces debemos generar dos funciones distintas en lugar de una función que reciba un booleano. 
+
+F4: Funciones Muertas
+
+Son aquellas funciones que no se llaman nunca. Las mismas se deben eliminar. Si las necesitamos en el futuro siempre podemos ir a buscarlas a GIT. 
+
+--------------------------------
+
+## Code smells generales - Parte 1: 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
