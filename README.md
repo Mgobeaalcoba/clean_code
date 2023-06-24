@@ -119,6 +119,193 @@ Esta filosofía es muy buena en la teoria pero en la práctica es muy complicada
 
 -------------------------------------------------------
 
+## Ejemplo practico: 
+
+Para llamar a los métodos de nuestras clases de test podemos usar la estructura: 
+
+- given(pre-condición/dado) + when(cuando) + then(entonces): 
+
+- Clases a testear: 
+
+```py
+class CalculadoraEstatica:
+    # Puedo acceder a sus métodos sin instanciarla
+    @staticmethod
+    def suma(a, b):
+        return a + b
+
+    @staticmethod
+    def resta(a, b):
+        return a - b
+
+    @staticmethod
+    def division(a, b):
+        return a / b
+    
+
+class Calculadora:
+    # Tiene constructor dado que para acceder a sus métodos debo instanciarla
+    def __init__(self):
+        pass
+
+    def suma(self, a, b):
+        return a + b
+
+    def resta(self, a, b):
+        return a - b
+
+    def division(self, a, b):
+        return a / b
+```
+
+- Clases de testeo con unittest y coverage para ver y analizar cobertura: 
+
+
+```py
+from unittest import TestCase
+from calculadoras import CalculadoraEstatica, Calculadora
+
+
+class CalculadoraEstaticaTest(TestCase):
+
+    def test_metodo_suma_deberia_retornar_la_suma_de_dos_numeros(self):
+        # Given
+        numero1 = 5
+        numero2 = 10
+
+        # When
+        resultado = CalculadoraEstatica.suma(numero1, numero2)
+
+        # Then
+        self.assertEqual(resultado, 15)
+
+    def test_metodo_resta_deberia_retornar_la_resta_de_dos_numeros(self):
+        # Given
+        numero1 = 10
+        numero2 = 5
+
+        # When
+        resultado = CalculadoraEstatica.resta(numero1, numero2)
+
+        # Then
+        self.assertEqual(resultado, 5)
+
+    def test_metodo_division_deberia_retornar_el_cociente_de_dos_numeros(self):
+        # Given
+        numero1 = 10
+        numero2 = 2
+
+        # When
+        resultado = CalculadoraEstatica.division(numero1, numero2)
+
+        # Then
+        self.assertEqual(resultado, 5)
+    
+    def test_metodo_division_deberia_generar_un_error_si_el_divisor_es_cero(self):
+        # Given
+        numero1 = 10
+        numero2 = 0
+
+        # When & Then
+        with self.assertRaises(ZeroDivisionError):
+            CalculadoraEstatica.division(numero1, numero2)
+
+
+class CalculadoraTest(TestCase):
+
+    def test_metodo_suma_deberia_retornar_la_suma_de_dos_numeros(self):
+        # Given
+        mi_clase = Calculadora()
+        numero1 = 5
+        numero2 = 10
+
+        # When
+        resultado = mi_clase.suma(numero1, numero2)
+
+        # Then
+        self.assertEqual(resultado, 15)
+
+    def test_metodo_resta_deberia_retornar_la_resta_de_dos_numeros(self):
+        # Given
+        mi_clase = Calculadora()
+        numero1 = 10
+        numero2 = 5
+
+        # When
+        resultado = mi_clase.resta(numero1, numero2)
+
+        # Then
+        self.assertEqual(resultado, 5)
+
+    def test_metodo_division_deberia_retornar_el_cociente_de_dos_numeros(self):
+        # Given
+        mi_clase = Calculadora()
+        numero1 = 10
+        numero2 = 2
+
+        # When
+        resultado = mi_clase.division(numero1, numero2)
+
+        # Then
+        self.assertEqual(resultado, 5)
+    
+    def test_metodo_division_deberia_generar_un_error_si_el_divisor_es_cero(self):
+        # Given
+        mi_clase = Calculadora()
+        numero1 = 10
+        numero2 = 0
+
+        # When & Then
+        with self.assertRaises(ZeroDivisionError):
+            mi_clase.division(numero1, numero2)
+```
+
+Para simplemente ejecutar los testeos usando unittest debo ubicarme en el directorio donde tengo el archivo de testing y ejecutar el comando: 
+
+```bash
+python3 -m unittest nombre_del_archivo.py
+```
+
+Si quiero ejecutar los tests usando el modulo de coverage entonces debo: 
+
+1. Instalar coverage en mi venv: 
+
+```bash
+pip install coverage
+```
+
+2. Asegurarme de que mi archivo de test comience con "test_" y termine con ".py"
+
+3. Ejecutar en consola: 
+
+```bash
+coverage run -m unittest discover
+```
+Ejecuta todos los test que tenga la sintaxis señalada arriba
+
+```bash
+coverage report
+```
+Imprime por consola el reporte de cobertura
+
+```bash
+13:13:59 👽 with 🤖 mgobea 🐶 in ~/develop/clean_code via clean_code …
+➜ coverage report
+Name                   Stmts   Miss  Cover
+------------------------------------------
+calculadoras.py           19      0   100%
+test_calculadoras.py      48      0   100%
+------------------------------------------
+TOTAL                     67      0   100%
+```
+
+```bash
+coverage html
+```
+Genera un directorio y dentro del mismo un archivo index.html donde podremos ver en una web el mismo reporte de cobertura que antes veiamos por consola. 
+
+<img src="./images/coverage_report_html.png">
+
 
 
 
