@@ -358,7 +358,8 @@ Ejemplo 6: Comentarios mal redactados. No hay que cometer faltas de ortografía 
 
 Mas concretamente son code smells asociados a la etapa de compilación del software y de la ejecución de tests. 
 
-E1: La compilación requiere mas de un paso: 
+**E1: La compilación requiere mas de un paso:**
+
 Debes ser capaz de hecer un checkout del código fuente con un comando y compilarlo con otro. 
 
 Aplicado a Python tiene que ver con las dependencias de un proyecto. Es importante detallar las mismas (archivo requirements.txt) así como un código simple que nos permita tenerlas y no estar instalando una por una. En python ese comando es: 
@@ -368,7 +369,7 @@ pip install -r requirements.txt
 ```
 Por supuesto que este comando solo va a funcionar en los casos donde contemos en el proyecto donde estamos trabajando con un archivo requirements.txt. De allí la importancia de generarlo y mantenerlo actualizado al mismo cuando somos nosotros los que iniciamos un proyecto o agregamos dependencias al mismo que inicialmente no existian. 
 
-E2: Los tests requieren mas de un paso
+**E2: Los tests requieren mas de un paso**
 
 Los tests se deben ejecutar con único comando que sea simple, rápido y obvio. Caso contrario corremos el riesgo de ejecutar los tests habitualmente por "pereza". Debemos ejecutar los tests cada día decenas, o incluso cientos de veces para evitar cometer errores en el código que luego nos cueste mucho tiempo encontrar. 
 
@@ -382,29 +383,258 @@ python3 -m unittest nombre_del_archivo.py
 
 ## Code smells asociados a las funciones
 
-F1: Demasiados argumentos
+**F1: Demasiados argumentos**
 
 Lo mejor es que una función no reciba argumentos, seguido por uno, dos y tres argumentos. Se deben evitar las funciones con > 3 argumentos. 
 
 Es una buena práctica, que ya mencionamos mas arriba encapsular argumentos dentro de una clase cuando la misma recibe mas de 3 argumentos. Otra opción es dividir la función en dos o mas funciones para reducir así la cantidad de argumentos recibidos. Dado que seguramente si una función recibe mas de tres argumentos su scope sea superior a la máxima que reza que una función debe hacer una única cosa. 
 
-F2: Argumentos de salida
+**F2: Argumentos de salida**
 
 Una función no debe realizar tareas de salida a consola, por ejemplo, no debe imprimir. En su lugar debe retornar los valores que que queremos sacar de la misma para que la impresión se realice desde el codigo principal.
 
 Otro ejemplo del mismo error es envíar un argumento con puntero (& para enviarla y * para recibirla. Al igual que los punteros en Golang), es decir, del entorno global del programa, dado que queremos modificarlo dentro de la función en lugar de retornar un valor de la función y luego guardarlo en una variable que invoque a nuestra función.
 
-F3: Pasar flags (variables booleanas) como argumento
+**F3: Pasar flags (variables booleanas) como argumento**
 
 ¿Por que es un error? Porque un flag suele indicar que una función hace mas de una cosa, es decir, va a hacer algo si el flag es true y otra cosa si el flag es false. Y como ya repetimos muchas veces esto es un error dado que una función debe hacer una única cosa. Si tenes la necesidad de hacer dos cosas distintas entonces debemos generar dos funciones distintas en lugar de una función que reciba un booleano. 
 
-F4: Funciones Muertas
+**F4: Funciones Muertas**
 
 Son aquellas funciones que no se llaman nunca. Las mismas se deben eliminar. Si las necesitamos en el futuro siempre podemos ir a buscarlas a GIT. 
 
 --------------------------------
 
 ## Code smells generales - Parte 1: 
+
+**G1: Múltiples lenguajes en un mismo archivo:**
+
+No debemos mezclar dos lenguajes en un mismo fichero. Ej: Java + HTML o JS + CSS, etc.
+
+**G2: Comportamiento obvio no implementado**
+
+Por ejemplo si tenemos un método que convierte un string con el nombre de un mes a un enum del mismo mes ("July" a Month.JULY) vamos a esperar que haga lo mismo si escribo "July" de otras formas tales como "JULY" o "july". Sie el codigo efectivamente no hace eso entonces perdemos la confianza en el mismo y se debe revisar lo que el mismo hace linea por linea.
+
+**G3: Comportamiento incorrecto en los límites del codigo**
+
+Ejemplo, un codigo que en función de la pertenencia a dos listas (meses de 30 y meses de 31 días) clasifica un string con un nombre de un mes entre mes de 31, mes de 30 o mes de 28 falla en los límites dado que si el año es bisiesto febrero tendrá 29 en lugar de 28. 
+
+**G4: Anular mecanismos de seguridad**
+
+1. Deshabilitar warnings del compilador
+2. Comentar o ingnorar tests que están fallando
+3. Ignorar los reportes de plataformas de análisis de código (SonarQube)
+
+**G5: Duplicidad**
+
+1. La duplicidad en el código representa una oportunidad perdida para crear una nueva abstracción. 
+2. El código repetido se puede abstraer en un método o incluso una clase. 
+3. La duplicidad en varias clases puede indicar la necesidad de una jerarquía y aplicar herencia entre nuestras clases. 
+
+**G6: Código en el nivel de abstracción incorrecto**
+
+Ejemplos: clase "conductor" que tiene entre sus métodos encender el motor y apagar el motor, cuando los mismos deberían ser métodos de otra clase llamada "auto". Otro ejemplo puede ser una clase Vehiculo que tiene entre sus metodos "cambiar canal de radio" este mismo debería ser un método de la clase "radio". ¿Por que es ajeno? Porque no necesariamente todos los vehiculos tienen Radio (una moto en general no tiene) entonces poner ese método en esta clase es un error de abstracción. 
+
+**G7: Clases base dependen de las clases derivadas**
+
+Las clases base no deben saber nada de las derivdas sino que debe funcionar a la inversa.
+
+**G8: Demasiada información**
+
+1. Los módulos bien definidos tienen interfaces muy pequeñas que permiten hacer mucho con pocos métodos.
+2. Debés codear únicamente lo estrictamente necesario
+3. En POO (Programación Orientada a Objetos), esconde tus datos, ofrece operaciones. 
+
+**G9: Código muerto**
+
+1. El código que no se ejecuta se debe eliminar inmediatamente:
+   1. Funciones que no se llaman.
+   2. Condiciones en swithc/cas o if que no se dan nunca.
+   3. try/catch con excepciones que nunca se lanzan (try/except en Python)
+2. El software de control de versiones (Git por ejemplo) recondará todo por vos para cuando lo necesites. 
+
+**G10: Distancia vertical**
+
+1. Las variables y funciones deben estar cerca de donde se usan:
+   1. Las variables locales se deben declarar justo antes de usarlas
+   2. Las funciones privadas deben estar justo debajo de la primera función que las usa
+2. No queremos que código local esté situado a cientos de lineas de donde se usa. 
+
+**G11: Inconsistencia**
+
+1. Si haces algo de cierta manera, hazlo siempre de la misma forma.
+2. Por ejemplo, si utilizas la palabra Processor en UserRequestProcessor, no crees la clase AdminRequestHandler
+3. Si eliges la palabra delete para las eliminaciones, no uses remove
+4. La consistencia hace que nuestro código sea mucho mas facil de leer. 
+
+**G12: Basura**
+
+1. Constructores por defecto sin implementación
+2. Getters y setters de absolutamente todas las variables privadas de una clase.
+3. Variables que no se usan.
+4. Funciones que nunca se llaman. 
+
+**G13: Acoplamiento artificial**
+
+Los elementos que no dependen uno del otro no deben estar acoplados. Por ejemplo una clase Circulo que tenga dentro de sí una constante PI. Esto es un error dado que PI no es un elemento usado solamente para calcular el area de un circulo sino que tiene distintos usos. Por lo que PI debería ser un atributo de una clase Matematicas en lugar de ser el atributo de la clase Circulo. 
+
+**G14: Envidia del ámbito de otra clase**
+
+Este uno de los problemas de diseño que mas se presentan...
+
+Los métodos de una clase deben estar interesados en sus propíos atributos y funciones y no estar necesitando permanentemente usar atributos y funciones de otras clases. 
+
+**G15: Flags o argumentos booleanos en las funciones**
+
+Ya lo vimos en la sección de code smells de las funciones pero no está de mas recordarlo. Un función no debe recibir entre sus atributos uno de tipo booleano dado que si lo hace seguramente sea para hacer dos cosas distintas en lugar de una sola que debe ser la esencia de una función. 
+
+**G16: Intenciones ocultas o difíciles de apreciar**
+
+1. El código debe ser lo más expresivo posible.
+2. De nada vale un código que ocupe poco espacio si no lo entendemos. 
+
+**G17: Responsabilidad fuera del lugar**
+
+1. El código debe ser escrito en el lugar mas natural para un lector.
+2. ¿Donde ponemos PI, En Math, en la clase Trigonometry o en la clase Circle? 
+3. No escribir el código donde más nos convenga en un momento, si no en donde se esperaría leer. 
+
+**G18: Métodos estáticos inapropiados**
+
+1. Los métodos estáticos no operan con ninguna instancia. Es decir, se usan directamente desde la clase abstracta sin necesidad de instanciar un objeto de la misma. 
+2. Math.abs(double number) es un buen ejemplo. 
+3. ¿Queremos que un método sea polimórfico? En ese caso deberiamos crear un método genérico de una clase de alta abstracción para luego refactorizarlo, aplicando el polimorfismo, y adaptarlo a las necesidades de cada una de las clases que heredan de está clase "padre". 
+
+---------------------------------------
+
+## Code smells generales - 2° parte: 
+
+**G19: No usar variables explicatorias**
+
+1. Las variables intermedias pueden dejar mas clara una operación
+2. Ejemplo: cálculo del área de un triángulo rectángulo dada la hipotenusa y un cateto. 
+
+Es decir conviene ir guardando variables intermedias antes de obtener el resultado final con una operación muy compleja que sea dificil de comprender para quien lee el código. 
+
+**G20: Funciones que no dicen lo que hacen**
+
+1. Los nombres de las funciones deben ser explicativos. Si algo en el código no nos queda claro entonces debemos ser mas explicitos con lo que hace una función. 
+
+**G21: No conocer el algoritmo**
+
+1. Debemos entender perfectamente los algoritmos complicados. 
+2. Si no los entendemos, nuestro código no será todo lo limpio que podría ser. 
+
+**G22: Tener dependencias lógicas en lugar de físicas**
+
+1. Si una clase depende de otra, debe depender de forma física. Es decir, la información que es natural de una clase debe ser llamada mediante la instanciacion de esa clase y el uso de sus atributos o métodos y nunca suplantando esa información de forma lógica en el codigo de la clase que necesita esa información. 
+
+**G23: No usar polimorfismo en lugar de if/else**
+
+1. Se debe preferir polimorfismo en lugar de if/else o switch/case
+
+Ejemplo: clase Animal con método speak() que verifica si el tipo de animal (atributo de la clase) es Gato, Perro o Vaca y emite un sonido en función de ese tipo debería ser refactorizada aplicando polimorfismo sobre el método speak() de Animal. Mediante herencia creamos tres clases Gato, Perro y Vaca que extienden/heredan de Animal y cada clase va a sobreescribir el método speak aplicando el polimorfismo para que directamente cada animal haga el sonido que le corresponde. 
+
+2. Usar switches o if/elses en partes del programa donde sea más probable añadir funcionalidad que añadir tipos. 
+
+**G24: No seguir convenciones**
+
+1. Seguir las normas sobre nombres de clases, variables, tamaño de línea, donde poner las lleaves, etc de cada lenguaje es fundamental. 
+2. Todo el equipo de desarrollo debe seguir las mismas normas. 
+
+**G25: Usar números mágicos en lugar de constantes**
+
+Debemos evitar el hardcodeo en operaciones matematicas. Lo ideal es trabajar con constantes y luego llamarlas cuando se requieran. 
+
+**G26: No ser precisos**
+
+1. Debes ser preciso en las decisiones que tomes sobre tu código.
+2. No ser vago con tus decisiones: 
+   1. Si vas a tratar con dinero, usa enteros y trata bien el redondeo.
+   2. Si tratas con concurrencia, asegúrate de que no hay carreras críticas.
+   3. Si hay métodos que pueden lanzar excepciones que romperán tu programa, trátalos como corresponden para que no lo hagan menajando los errores y excepciones. 
+
+**G27: Darle mas peso a convenciones que a la estructura**
+
+1. Las convenciones son importantes, pero el diseño de tu software es más importante.
+2. Por ejemplo, no uses directamente la **estructura controller-service-repository de Spring** si no es la apropiada para tu código.
+
+**G28: No encapsular condicionales**
+
+Las condiciones encapsuladas en una función son mucho más fáciles de leer. 
+
+```java
+if (user.getRole() != Role.ADMIN && user.isInactive())
+
+if (shouldBeDeleted(user))
+```
+
+**G29: Usar condicionales negativos**
+
+1. Si es posible usar condicionales positivos siempre...
+
+```java
+if(!shouldNotBeDeleted(user)) // Mala práctica
+
+if(shouldBeDeleted(user)) // Buena práctica
+```
+**G30: Las funciones hacen más de una cosa**
+
+1. Las funciones deben hacer una única cosa
+2. Las funciones que hacen una cosa son mucho más legibles.
+3. Si una función hace más de una cosa, se debe refactorizar en dos o más funciones. 
+
+**G31: Acoplamientos temporales escondidos**
+
+Cuando una función requiere un atributo que debe ejecutarse o instanciarse antes el mismo debe ser explicitado y no debe estar escondido. 
+
+**G32: Ser arbitrario**
+
+1. No seas arbitrario
+2. Si la estructura de tu código es arbitraria, otros harán lo mismo sobre él. 
+3. Si tus decisiones sobre todo el sistema son consistentes, otros compañeros la seguirán, manteniendo el código limpio. 
+
+**G33: No encapsular las condiciones límite**
+
+Ejemplo: 
+
+```java
+if (level + 1 == game.getMaximumLevel()) {
+   loadFinalBoss();
+} // Mala práctica dejar la condición límite "level + 1" sin encapsular...
+
+Integer nextLevel = level + 1;
+if (nextLevel == game.getMaximumLevel()) {
+   loadFinalBoss();
+} // Buena practica dado que está encapsualada la condición límite en la variable nextLevel
+```
+**G34: Funciones con más de un nivel de abstracción**
+
+Las funciones deben tratar con un único nivel de abstracción. Recordar el ejemplo de la clase Person que tiene método drive y dentro del mismo tiene acciones que son propias de la persona y otras del auto. 
+
+**G35: Configuraciones no modificables a alto nivel**
+
+1. El software debe ser configurable a alto nivel.
+2. Evitar que los parámetros de configuración estén mezclados con la lógica de negocio, a bajo nivel
+
+**G36: Navegación transitiva**
+
+1. Un módulo debe saber lo menos posible sobre los demás.
+2. Si A usa B y B usa C, evitar a.getB().getC().exampleMethod();
+3. Esta es la Ley de Demeter. "Escribir código tímido".
+4. Si queremos intercalar un D entre B y C, tendrías que buscar todos los a.getB().getC() para cambiarlos a a.getB().getD().getC().
+5. Así se forman las arquitecturas rígidas. 
+
+--------------------------------------
+
+## Code smells de Java
+
+
+
+
+
+
+
 
 
 
