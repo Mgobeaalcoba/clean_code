@@ -627,7 +627,257 @@ Las funciones deben tratar con un único nivel de abstracción. Recordar el ejem
 
 --------------------------------------
 
-## Code smells de Java
+## Code smells de Java (Extensibles a otros lenguajes algunos de ellos)
+
+**J1: Listas de imports muy largas**
+
+1. Si usas dos o más clases de un paquete, importa todo el paquete: 
+
+```py
+import package
+```
+
+en lugar de:
+
+```py
+from package import Class, function, variable
+```
+
+2. No queremos ensuciar nuestros módulos con 100 lineas de imports
+
+**J2: Herencia de constantes**
+
+Ejemplo: clase EasyGame que hereda de Game y usa una constante heredada de Game que a su vez implementa una interface GameConstants... Esto es una mala práctica, es poco intuitivo. 
+
+En su lugar se debería usar la constante desde la clase (GameConstants.NUMBER_OF_LEVELS) o importar estáticamente las clases con las constantes (import static GameConstants.*)
+
+**J3: Enums vs constantes**
+
+1. Usar enums siempre que sea posible en lugar de constantes. 
+
+----------------------------------
+
+## Code smells en los nombres
+
+**N1: Nombres no descriptivos**
+
+1. Utiliza nombres descriptivos. No letras individuales (a excepción de en un ciclo for por ejemplo)
+
+**N2: Nombres en nivel de abstracción incorrecto**
+
+```java
+public interface FileDownloader {
+   File download(String webUrl)
+}
+```
+1. Si tenemos una clase FtpFileDownloader que implementa la interfaz, ya no recibiría una web url, sino por ejemplo una IP y una ruta
+
+**N3: No usar nomenclatura estándar**
+
+1. Usar la nomenclatura estándar cuando sea posible. 
+2. Usar la palabra Singleton para clases que usen dicho patrón, la palabra Controller para las clases de tu capa controlador etc. 
+3. Sobreescribir métodos toString que ya tienen las clases java en lugar de crear un método propio. 
+
+**N4: Nombres ambiguos**
+
+1. Evitar la ambiguedad en los nombres de las variables y de las fucniones. Los nombres deben ser descriptivos y claros. Hay que evitar usar palabras resumidas o recortadas si las mismas se pueden malinterpretar. 
+
+**N5: No usar nombres largos para largos alcances**
+
+1. Se pueden usar nombres de pocos caracteres para situaciones de alcance muy acotado. Ejemplo: nuevamente el caso de un ciclo for que se recorre con variables i, j o k
+2. Usar nombres largos en situaciones de mayor alcance. Dentro de una clase los atributos y metodos no deben ir resumidos, sino que deben llevar nombres descriptivos.
+
+**N6: Usar codigicaiones**
+
+1. Evita los nombres con codificaciones que ensucien y distraigan al lector. 
+2. Variables String strName o Integer intVariable... En estos casos no tiene sentido aplicar el prefijo str o int a las variables.
+
+**N7: Ocultar los efectos secundarios**
+
+1. Si existen efectos secundarios, los nombres de variables y funciones deben describirlos. 
+
+Ejemplo: función login que ademas de comprobar credenciales verifica la cantidad de intentos de login y si supera las 3 bloquea la IP. Esta ultima acción no se describe en el nombre de la función login.
+
+------------------------------------
+
+## Code smells asociados a los tests
+
+**T1: Tests insuficientes**
+
+1. Hacer tests para todas las condiciones y limites de una función. Se deben probar todas las posibilidades. 
+2. Mientras no se hayan probado todas las condiciones, los tests son insuficientes. 
+
+**T2: No usar una herramienta de cobertura**
+
+1. Las herramientas de cobertura te muestran fácilmente las condiciones y lineas no probadas. 
+2. SonarQube te ofrece detalles de bugs y code smells presentes en tu código, entre otras muchas métricas. En Python podemos usar para esta tarea **PyLint**
+
+- Pasos para su uso: 
+
+```bash
+pip install pylint
+```
+
+```bash
+pylint nombre_del_archivo.py
+```
+
+Me devuelve un análisis de este tipo: 
+
+```bash
+11:45:39 👽 with 🤖 mgobea 🐶 in ~/develop/clean_code via clean_code …
+➜ pylint calculadoras.py
+************* Module calculadoras
+calculadoras.py:14:0: C0303: Trailing whitespace (trailing-whitespace)
+calculadoras.py:28:0: C0304: Final newline missing (missing-final-newline)
+calculadoras.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+calculadoras.py:1:0: C0115: Missing class docstring (missing-class-docstring)
+calculadoras.py:4:4: C0116: Missing function or method docstring (missing-function-docstring)
+calculadoras.py:4:13: C0103: Argument name "a" doesn't conform to snake_case naming style (invalid-name)
+calculadoras.py:4:16: C0103: Argument name "b" doesn't conform to snake_case naming style (invalid-name)
+calculadoras.py:8:4: C0116: Missing function or method docstring (missing-function-docstring)
+calculadoras.py:8:14: C0103: Argument name "a" doesn't conform to snake_case naming style (invalid-name)
+calculadoras.py:8:17: C0103: Argument name "b" doesn't conform to snake_case naming style (invalid-name)
+calculadoras.py:12:4: C0116: Missing function or method docstring (missing-function-docstring)
+calculadoras.py:12:17: C0103: Argument name "a" doesn't conform to snake_case naming style (invalid-name)
+calculadoras.py:12:20: C0103: Argument name "b" doesn't conform to snake_case naming style (invalid-name)
+calculadoras.py:16:0: C0115: Missing class docstring (missing-class-docstring)
+calculadoras.py:21:4: C0116: Missing function or method docstring (missing-function-docstring)
+calculadoras.py:21:19: C0103: Argument name "a" doesn't conform to snake_case naming style (invalid-name)
+calculadoras.py:21:22: C0103: Argument name "b" doesn't conform to snake_case naming style (invalid-name)
+calculadoras.py:24:4: C0116: Missing function or method docstring (missing-function-docstring)
+calculadoras.py:24:20: C0103: Argument name "a" doesn't conform to snake_case naming style (invalid-name)
+calculadoras.py:24:23: C0103: Argument name "b" doesn't conform to snake_case naming style (invalid-name)
+calculadoras.py:27:4: C0116: Missing function or method docstring (missing-function-docstring)
+calculadoras.py:27:23: C0103: Argument name "a" doesn't conform to snake_case naming style (invalid-name)
+calculadoras.py:27:26: C0103: Argument name "b" doesn't conform to snake_case naming style (invalid-name)
+
+-----------------------------------
+Your code has been rated at 0.00/10
+```
+
+3. Si tu IDE dispone de algún plugin de análisis de cobertura, úsalo! (Ej: SonarLint)
+
+**T3: Evitar los test triviales**
+
+1. No evites escribir test triviales.
+2. Son fáciles de implementar y su valor es mayor al coste de producirlos --> Esta debe ser la lógica que usemos para decidir si un test debe escribirse o no. 
+
+**T4: Tests ignorados**
+
+1. Robert C Martin (Clean Code): "A veces, tenemos dudas sobre los detalles de una funcionalidad, porque los requisitos no están claros. Podemos expresar estas dudas con un test comentado, o con un test anotado con @Ignore. Las opciones que elijas depende de si tu test compila o no".
+
+**T5: No testear las condiciones límite**
+
+1. Muchos bugs aparecen por no probar las condiciones límite. Un ejemplo de condiciones límite que ya revisamos es el la clasificación de los meses entre meses de 30, 31 y 28 días. Si el año bisiesto Febrero no entran en ninguna. Esa sería una condición límite.
+2. Muchas veces probamos nuestro software en condiciones normales, descuidando las condiciones límite. 
+
+**T6: No buscar bugs de forma exhaustiva**
+
+1. Los bugs tienden a estar cerca unos de otros. 
+2. Si encuentras un bug en una función, revisala, porque es probable que haya más.
+
+**T7: Los patrones de fallo son reveladores**
+
+1. Debes analizar las similitudes entre los fallos de una función.
+2. Ejemplo: función que falla cuando le pasamos una cadena de texto con espacios en blanco. 
+
+**T8: La cobertura de código es reveladora**
+
+1. Puedes encontrar el motivo de un fallo en un test analizando las líneas que no se ejecutan.
+
+**T9: Tests lentos**
+
+1. Si los tests son lentos tendemos a no ejecutarlos.
+2. Debemos ejecutar nuestros tests decenas de veces al día, por lo que hacer que los tests sean rapidos es fundamental para garantizar la calidad del código. 
+
+-----------------------------------
+
+## Conclusiones de Clean Code. 
+
+1. Escribir código limpio es un proceso continuo y complicado. Se mejora día a día. 
+2. No te frustes intentando escribir el código perfecto desde el principio. Implementa la funcionalidad y una vez esté correcta, refactoriza tu código de forma iterativa. 
+3. Revisa código de otras personas. Podrás aprender mucho leyendo código distinto al tuyo ¡y hasta le encontrarás defectos!
+4. Incita a las demás personas a escribir buen código.
+
+Hasta acá hemos revisado la calidad del código a bajo nivel. Ahora vamos a revisar la calidad del código a alto nivel. Para eso vamos a comprender y repasar los principios SOLID...
+
+----------------------------------
+
+# Principios SOLID:
+
+## Introducción.
+
+SOLID es clave para crear **arquitecturas limpias** o arquitecturas de software de calidad. 
+
+¿Cuales son los problemas de tener una mala arquitectura? 
+
+1. Es complicado de mantener y mejorar el código a largo plazo.
+2. Una mala arquitectura supone que el esfuerzo necesario para implementar nuevas funcionalidades se incrementa exponencialmente cn el paso del tiempo. Mientras tanto, la productividad disminuye.
+3. Mayor esfuerzo => Menor producitivadad => Menores beneficios => Abandono del software. 
+
+**Obejtivo de una buena arquitectura**
+
+El objetivo de la arquitectura desoftware es minimizar los recursos humanos necesarios para construir y mantener un sistema. 
+
+**¿Que significa SOLID?**
+
+Es un acrónimo de 5 principios propuestos por Robert C. Martin:
+
+- **S**ingle Responsibility Principle
+- **O**pen-Closed Principle
+- **L**iskov Substitution Principle
+- **I**interface Segregation Principle
+- **D**dependency Inversion Principle
+
+**¿Para que sirven los principios SOLID?**
+
+1. Crear software escalable
+2. Crear una arquitectura limpia y mantenible
+3. Escribir código mas facil de leer y entender
+4. Módulos con alta cohesion y bajo acoplamiento
+
+-----------------------------------
+
+## Cohesion y Acoplamiento
+
+1. Cohesión
+   - Grado en que los elementos de un módulo están relacionados entre sí.
+   - Nos interesa que un módulo tenga una cohesión muy alta. 
+
+**Ejemplo**: Una clase Game que tiene atributos y métodos que que son parte de dos niveles de abstracción distintos. Por un lado atributos y métodos del Game en sí y por otro lado atributos y métodos que deberían formar parte de una clase Player.
+
+2. Acoplamiento
+   - Grado en el que dos módulos software están relacionados entre sí. 
+   - Con un buen diseño de software, se crean módulos **poco acoplados.**
+   - Si se modifica un módulo, debe afectar lo menos posible a los demás. 
+
+**Deseable: Alta cohesión y bajo acoplamiento.** 
+
+---------------------------------
+
+## SRP ó Single Responsability Principle (1° principio SOLID)
+
+**¿Que es el SRP?**
+
+1. Nombre que lleva a la confusión. No es que "un modulo deba hacer una única cosa"
+2. Un módulo debe tener una única razon para cambiar
+3. Dicho de otra forma el punto 2: Un módulo debe ser responsable de solo un usuario o interesado del sistema. 
+
+**¿Que entendemos por módulo?**
+
+En POO podemos entender la palabra módulo como una **clase**. 
+
+**Sintomas de incumplimiento del SRP**
+
+1. Duplicidad accidental: Esa clase viola el SRP porque es responsable de tres tipos distintos de empleados
+
+Ejemplo: Clase Employee que administra los atributos y métodos de tres tipos de empleados distintos (Recursos humanos, DBA y Accountant). Si uno de esos tres actores necesita un cambio en el algoritmo que reporta horas ese cambio va a afectar a los otros. Tendriamos que tener una clase para el EmployeeRH, otra para EmployeeDBA y una tercera para EmployeeAC. Las tres podrían heredar de una clase Employee que solo contenga aquello que los uné a los tres tipos de empleados y que sabemos que no va a cambiar. 
+
+2. Merges de código:
+   - Si es necesario realizar merges a menudo, es muy probable que se incumpla el SRP.
+   - Dos programadores hacen un checkout para modificar la misma clase por razones distintas significa que esa clase tiene más de una razon para cambiar. Resulta en un merge, que puede afectar al código que implementó el otro programador. 
+
 
 
 
