@@ -878,35 +878,500 @@ Ejemplo: Clase Employee que administra los atributos y métodos de tres tipos de
    - Si es necesario realizar merges a menudo, es muy probable que se incumpla el SRP.
    - Dos programadores hacen un checkout para modificar la misma clase por razones distintas significa que esa clase tiene más de una razon para cambiar. Resulta en un merge, que puede afectar al código que implementó el otro programador. 
 
+Ejemplo concreto: 
+Como su propio nombre indica, establece que una clase, componente o microservicio debe ser responsable de una sola cosa (el tan aclamado término “decoupled” en inglés). Si por el contrario, una clase tiene varias responsabilidades, esto implica que el cambio en una responsabilidad provocará la modificación en otra responsabilidad.
 
+Considera este ejemplo:
 
+```java
+class Coche {  
+    String marca;
 
+    Coche(String marca){ this.marca = marca; }
 
+    String getMarcaCoche(){ return marca; }
 
+    void guardarCocheDB(Coche coche){ ... }
+}
+```
 
+¿Por qué este código viola el principio de responsabilidad única? Para un minuto y piensa un poco ;)
 
+Como podemos observar, la clase Coche permite tanto el acceso a las propiedades de la clase como a realizar operaciones sobre la BBDD, por lo que la clase ya tiene más de una responsabilidad.
 
+Supongamos que debemos realizar cambios en los métodos que realizan las operaciones a la BBDD. En este caso, además de estos cambios, probablemente tendríamos que tocar los nombres o tipos de las propiedades, métodos, etc, cosa que no parece muy eficiente porque solo estamos modificando cosas que tienen que ver con la BBDD, ¿verdad?
 
+Para evitar esto, debemos separar las responsabilidades de la clase, por lo que podemos crear otra clase que se encargue de las operaciones a la BBDD:
 
+```java
+class Coche {  
+    String marca;
 
+    Coche(String marca){ this.marca = marca; }
 
+    String getMarcaCoche(){ return marca; }
+}
 
+class CocheDB{  
+    void guardarCocheDB(Coche coche){ ... }
+    void eliminarCocheDB(Coche coche){ ... }
+}
+```
 
+Nuestro programa será mucho más cohesivo y estará más encapsulado aplicando este principio.
 
+----------------------------------
 
+## Open-Closed Principle (2° principio de SOLID)
 
+1. Un artefacto software debe estar abierto para su extensión pero cerrado para su modificación.
+2. Debemos poder aumentar la funcionalidad de un artefacto software sin la necesidad de modificar el funcionamiento ya existente en ese artefacto. 
 
+**¿Como se consigue?**
 
+1. Separando el software en componentes con alta cohesión (SRP), y asegurandose de que la dirección de las dependencias es la correcta (DIP).
+2. Debemos proteger los componentes de alto nivel de los cambios surgidos en los componentes de bajo nivel. 
 
+Ejemplo: 
 
+Si seguimos con la clase Coche:
 
+```java
+class Coche {  
+    String marca;
 
+    Coche(String marca){ this.marca = marca; }
 
+    String getMarcaCoche(){ return marca; }
+}
+```
 
+Si quisiéramos iterar a través de una lista de coches e imprimir sus marcas por pantalla:
 
+```java
+public static void main(String[] args) {  
+    Coche[] arrayCoches = {
+            new Coche("Renault"),
+            new Coche("Audi")
+    };
+    imprimirPrecioMedioCoche(arrayCoches);
+}
 
+public static void imprimirPrecioMedioCoche(Coche[] arrayCoches){  
+    for (Coche coche : arrayCoches) {
+        if(coche.marca.equals("Renault")) System.out.println(18000);
+        if(coche.marca.equals("Audi")) System.out.println(25000);
+    }
+}
+```
+Esto no cumpliría el principio abierto/cerrado, ya que si decidimos añadir un nuevo coche de otra marca:
 
+```java
+Coche[] arrayCoches = {  
+    new Coche("Renault"),
+    new Coche("Audi"),
+    new Coche("Mercedes")
+};
+```
 
+También tendríamos que modificar el método que hemos creado anteriormente:
 
+```java
+public static void imprimirPrecioMedioCoche(Coche[] arrayCoches){  
+    for (Coche coche : arrayCoches) {
+        if(coche.marca.equals("Renault")) System.out.println(18000);
+        if(coche.marca.equals("Audi")) System.out.println(25000);
+        if(coche.marca.equals("Mercedes")) System.out.println(27000);
+    }
+}
+```
 
+Como podemos ver, para cada nuevo coche habría que añadir nueva lógica al método precioMedioCoche(). Esto es un ejemplo sencillo, pero imagina que tu aplicación crece y crece… ¿cuántas modificaciones tendríamos que hacer? Mejor evitarnos esta pérdida de tiempo y dolor de cabeza, ¿verdad?
 
+Para que cumpla con este principio podríamos hacer lo siguiente:
+
+```java
+abstract class Coche {  
+    // ...
+    abstract int precioMedioCoche();
+}
+
+class Renault extends Coche {  
+    @Override
+    int precioMedioCoche() { return 18000; }
+}
+
+class Audi extends Coche {  
+    @Override
+    int precioMedioCoche() { return 25000; }
+}
+
+class Mercedes extends Coche {  
+    @Override
+    int precioMedioCoche() { return 27000; }
+}
+
+public static void main(String[] args) {
+
+    Coche[] arrayCoches = {
+            new Renault(),
+            new Audi(),
+            new Mercedes()
+    };
+
+    imprimirPrecioMedioCoche(arrayCoches);
+}
+
+public static void imprimirPrecioMedioCoche(Coche[] arrayCoches){  
+    for (Coche coche : arrayCoches) {
+        System.out.println(coche.precioMedioCoche());
+    }
+}
+```
+
+Cada coche extiende la clase abstracta Coche e implementa el método abstracto precioMedioCoche().
+
+Así, cada coche tiene su propia implementación del método precioMedioCoche(), por lo que el método imprimirPrecioMedioCoche() itera el array de coches y solo llama al método precioMedioCoche().
+
+Ahora, si añadimos un nuevo coche, precioMedioCoche() no tendrá que ser modificado. Solo tendremos que añadir el nuevo coche al array, cumpliendo así el principio abierto/cerrado.
+
+-------------------------------
+
+## Liskov Substitution Principle (3° principio SOLID)
+
+**¿Que es LSP?**
+
+1. Todas las clases que hereden de otra podrán usarse indistintamente sin que eso rompa la aplicación, incluyendo en ello a la clase padre. 
+2. Por ejemplo, tenemos una clase que usa una instancia de la clase WebFileDownloader. Debemos poder cambiarla por una instancia de FtpFileDownloader sin romper nada en nuestro programa. 
+
+Cumpliendo con este principio se confirmará que nuestro programa tiene una jerarquía de clases fácil de entender y un código reutilizable.
+
+Veamos un ejemplo:.
+
+```java
+// ...
+public static void imprimirNumAsientos(Coche[] arrayCoches){  
+    for (Coche coche : arrayCoches) {
+        if(coche instanceof Renault)
+            System.out.println(numAsientosRenault(coche));
+        if(coche instanceof Audi)
+            System.out.println(numAsientosAudi(coche));
+        if(coche instanceof Mercedes)
+            System.out.println(numAsientosMercedes(coche));
+    }
+}
+imprimirNumAsientos(arrayCoches);  
+```
+
+Esto viola tanto el principio de substitución de Liskov como el de abierto/cerrado. El programa debe conocer cada tipo de Coche y llamar a su método numAsientos() asociado.
+
+Así, si añadimos un nuevo coche, el método debe modificarse para aceptarlo.
+
+```java
+// ...
+Coche[] arrayCoches = {  
+        new Renault(),
+        new Audi(),
+        new Mercedes(),
+        new Ford()
+};
+
+public static void imprimirNumAsientos(Coche[] arrayCoches){  
+    for (Coche coche : arrayCoches) {
+        if(coche instanceof Renault)
+            System.out.println(numAsientosRenault(coche));
+        if(coche instanceof Audi)
+            System.out.println(numAsientosAudi(coche));
+        if(coche instanceof Mercedes)
+            System.out.println(numAsientosMercedes(coche));
+        if(coche instanceof Ford)
+            System.out.println(numAsientosFord(coche));
+    }
+}
+imprimirNumAsientos(arrayCoches);  
+```
+
+Para que este método cumpla con el principio, seguiremos estos principios:
+
+Si la superclase (Coche) tiene un método que acepta un parámetro del tipo de la superclase (Coche), entonces su subclase (Renault) debería aceptar como argumento un tipo de la superclase (Coche) o un tipo de la subclase (Renault).
+Si la superclase devuelve un tipo de ella misma (Coche), entonces su subclase (Renault) debería devolver un tipo de la superclase (Coche) o un tipo de la subclase (Renault).
+Si volvemos a implementar el método anterior:
+
+```java
+public static void imprimirNumAsientos(Coche[] arrayCoches){  
+        for (Coche coche : arrayCoches) {
+            System.out.println(coche.numAsientos());
+        }
+    }
+
+imprimirNumAsientos(arrayCoches);  
+```
+
+Ahora al método no le importa el tipo de la clase, simplemente llama al método numAsientos() de la superclase. Solo sabe que el parámetro es de tipo coche, ya sea Coche o alguna de las subclases.
+
+Para esto, ahora la clase Coche debe definir el nuevo método:
+
+```java
+abstract class Coche {
+
+    // ...
+    abstract int numAsientos();
+}
+```
+
+Y las subclases deben implementar dicho método:
+
+```java
+class Renault extends Coche {
+
+    // ...
+    @Override
+    int numAsientos() {
+        return 5;
+    }
+}
+// ...
+```
+
+Como podemos ver, ahora el método imprimirNumAsientos() no necesita saber con qué tipo de coche va a realizar su lógica, simplemente llama al método numAsientos() del tipo Coche, ya que por contrato, una subclase de Coche debe implementar dicho método.
+
+----------------------------------------
+
+## Interface Segregation Principle (4° principio SOLID):
+
+1. Ningun cliente debe depender de métodos (interfaces) que no use. 
+
+Dicho de otra manera, cuando un cliente depende de una clase que implementa una interfaz cuya funcionalidad este cliente no usa, pero que otros clientes sí usan, este cliente estará siendo afectado por los cambios que fuercen otros clientes en dicha interfaz.
+
+Imaginemos que queremos definir las clases necesarias para albergar algunos tipos de aves. Por ejemplo, tendríamos loros, tucanes y halcones:
+
+```java
+interface IAve {  
+    void volar();
+    void comer();
+}
+
+class Loro implements IAve{
+
+    @Override
+    public void volar() {
+        //...
+    }
+
+    @Override
+    public void comer() {
+        //..
+    }
+}
+
+class Tucan implements IAve{  
+    @Override
+    public void volar() {
+        //...
+    }
+
+    @Override
+    public void comer() {
+        //..
+    }
+}
+```
+
+Hasta aquí todo bien. Pero ahora imaginemos que queremos añadir a los pingüinos. Estos son aves, pero además tienen la habilidad de nadar. Podríamos hacer esto:
+
+```java
+interface IAve {  
+    void volar();
+    void comer();
+    void nadar();
+}
+
+class Loro implements IAve{
+
+    @Override
+    public void volar() {
+        //...
+    }
+
+    @Override
+    public void comer() {
+        //...
+    }
+
+    @Override
+    public void nadar() {
+        //...
+    }
+}
+
+class Pinguino implements IAve{
+
+    @Override
+    public void volar() {
+        //...
+    }
+
+    @Override
+    public void comer() {
+        //...
+    }
+
+    @Override
+    public void nadar() {
+        //...
+    }
+}
+```
+
+El problema es que el loro no nada, y el pingüino no vuela, por lo que tendríamos que añadir una excepción o aviso si se intenta llamar a estos métodos. Además, si quisiéramos añadir otro método a la interfaz IAve, tendríamos que recorrer cada una de las clases que la implementa e ir añadiendo la implementación de dicho método en todas ellas. Esto viola el principio de segregación de interfaz, ya que estas clases (los clientes) no tienen por qué depender de métodos que no usan.
+
+Lo más correcto sería segregar más las interfaces, tanto como sea necesario. En este caso podríamos hacer lo siguiente:
+
+```java
+interface IAve {  
+    void comer();
+}
+interface IAveVoladora {  
+    void volar();
+}
+
+interface IAveNadadora {  
+    void nadar();
+}
+
+class Loro implements IAve, IAveVoladora{
+
+    @Override
+    public void volar() {
+        //...
+    }
+
+    @Override
+    public void comer() {
+        //...
+    }
+}
+
+class Pinguino implements IAve, IAveNadadora{
+
+    @Override
+    public void nadar() {
+        //...
+    }
+
+    @Override
+    public void comer() {
+        //...
+    }
+}
+```
+
+Así, cada clase implementa las interfaces de la que realmente necesita implementar sus métodos. A la hora de añadir nuevas funcionalidades, esto nos ahorrará bastante tiempo, y además, cumplimos con el primer principio (Responsabilidad Única).
+
+---------------------------
+
+## Dependency Inversion Principle (5° y último principio SOLID):
+
+1. Los sistemas más flexibles son aquellos que dependen de abstracciones, y no de concreciones.
+2. En un lenguaje como Java, eso significa que un módulo debe depender de interfaces y de clases abstractas, y no de immplementaciones volátiles.
+3. Esto hace necesario un mecanismo que nos cree las instancias de las implementaciones que queremos.
+
+Consideraciones sobre este principio: 
+
+1. La inversión dependencias es costosa.
+2. Posibilidad de utilizar algún framework que te aporte la inyección de dependencias, como Spring (@Autowired)
+3. Si tenés la certeza de que una clase no es vólatil (ej. lógica de negocio), puede depender de ella.
+4. Ante todo, analizar si un módulo es vólatil o no, antes de decidir si abstraer las dependencias de esta forma. 
+
+En algún momento nuestro programa o aplicación llegará a estar formado por muchos módulos. Cuando esto pase, es cuando debemos usar inyección de dependencias, lo que nos permitirá controlar las funcionalidades desde un sitio concreto en vez de tenerlas esparcidas por todo el programa. Además, este aislamiento nos permitirá realizar testing mucho más fácilmente.
+
+Supongamos que tenemos una clase para realizar el acceso a datos, y lo hacemos a través de una BBDD:
+
+```java
+class DatabaseService{  
+    //...
+    void getDatos(){ //... }
+}
+
+class AccesoADatos {
+
+    private DatabaseService databaseService;
+
+    public AccesoADatos(DatabaseService databaseService){
+        this.databaseService = databaseService;
+    }
+
+    Dato getDatos(){
+        databaseService.getDatos();
+        //...
+    }
+}
+```
+
+Imaginemos que en el futuro queremos cambiar el servicio de BBDD por un servicio que conecta con una API. Para un minuto a pensar qué habría que hacer... ¿Ves el problema? Tendríamos que ir modificando todas las instancias de la clase AccesoADatos, una por una.
+
+Esto es debido a que nuestro módulo de alto nivel (AccesoADatos) depende de un módulo de más bajo nivel (DatabaseService), violando así el principio de inversión de dependencias. El módulo de alto nivel debería depender de abstracciones.
+
+Para arreglar esto, podemos hacer que el módulo AccesoADatos dependa de una abstracción más genérica:
+
+```java
+interface Conexion {  
+    Dato getDatos();
+    void setDatos();
+}
+
+class AccesoADatos {
+
+    private Conexion conexion;
+
+    public AccesoADatos(Conexion conexion){
+        this.conexion = conexion;
+    }
+
+    Dato getDatos(){
+        conexion.getDatos();
+    }
+}
+```
+
+Así, sin importar el tipo de conexión que se le pase al módulo AccesoADatos, ni este ni sus instancias tendrán que cambiar, por lo que nos ahorraremos mucho trabajo.
+
+Ahora, cada servicio que queramos pasar a AccesoADatos deberá implementar la interfaz Conexion:
+
+```java
+class DatabaseService implements Conexion {
+
+    @Override
+    public Dato getDatos() { //... }
+
+    @Override
+    public void setDatos() { //... }
+}
+
+class APIService implements Conexion{
+
+    @Override
+    public Dato getDatos() { //... }
+
+    @Override
+    public void setDatos() { //... }
+}
+```
+
+Así, tanto el módulo de alto nivel como el de bajo nivel dependen de abstracciones, por lo que cumplimos el principio de inversión de dependencias. Además, esto nos forzará a cumplir el principio de Liskov, ya que los tipos derivados de Conexion (DatabaseService y APIService) son sustituibles por su abstracción (interfaz Conexion).
+
+-----------------------------------------------
+
+## Conclusión
+
+Aplicar estos cinco principios puede parecer algo tedioso, pero a la larga, mediante la práctica y echarles un vistazo de vez en cuando, se volverán parte de nuestra forma de programar.
+
+Nuestro programa será más sencillo de mantener, pero no solo para nosotros, si no más aún para los desarrolladores que vengan después, ya que verán un programa con una estructura bien definida y clara.
+
+**En el punto medio está la virtud**
+
+1. la arquitectura de software no es una ciencia fija
+2. La arquitectura se debe adaptar al problema, no al reves.
+3. Analiza tu problema y diseña tu software a medida, no partas de las mismas bases para todo tipo de problema. 
+4. Para un app pequeña seguramente no haga falta una gran arquitectura. Para un software empresarial que será desarrollado en varios años, si. 
+5. Si los requisitos de tu software cambian, adapta la arquitectura. 
